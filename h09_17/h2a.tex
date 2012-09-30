@@ -1,0 +1,48 @@
+
+\documentclass{article}
+
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks,linkcolor=,urlcolor=blue}
+
+\begin{document}
+
+\begin{verbatim}
+Our goal is to maximize profit of the hotel.
+Assume profit to be room_price*occupancy (not counting expenses).
+Then make 18 (20-2) plots, where x is corresponding factor and y is profit.
+Some relations were found:
+    (8) more businessmen share ~ a bit more profit;
+    (9) more tourists share ~ a bit less profit;
+    (18) more length of stay ~ more profit;
+    (20) conventions ~ a bit more profit;
+It is very easy to misinterpret, what are reasons and what are consequences here.
+Suggestions to improve profit can be for example:
+- to organize conventions for businessmen.
+- to give discounts for long-stays.
+Seasons does not seem to affect situation, 
+while some annual events can exist but are not discoverable on one-year range.
+Price vs occupancy plot does not show any relation,
+while occupancy is changing in a wider range than price.
+May be the price is already highly tuned, or it is random.
+Before changing prices we'd better look at the competitors' strategy.
+It seems that the hotel is located in business district,
+and profit-improvement-strategies need to be performed taking into consideration 
+other information like flights annulations or bank holidays.
+\end{verbatim}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=80mm]{out/f18_pro.png}
+\caption{length of stay to profit}
+\end{figure}
+
+\clearpage
+
+\lstinputlisting[language=Python,numbers=left]{h2a.py}
+
+\url{https://github.com/rewlad/ttu_andm}
+
+\end{document}
