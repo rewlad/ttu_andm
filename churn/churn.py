@@ -8,6 +8,7 @@
 #the sensitivity of the test can be determined by testing only positive cases
 
 # StandardScaler OneHotEncoder
+# LogisticRegression
 
 #import sys
 #sys.path.insert(0,'/home/rewlad/tmp/lib/python')
@@ -17,8 +18,10 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.linalg as la
-import sklearn.preprocessing as sp
+import sklearn.pipeline as spl
+import sklearn.preprocessing as spp
 import sklearn.decomposition as sk
+import sklearn.linear_model as slm
 import sklearn.metrics as sm
 
 def load_rows():
@@ -63,21 +66,12 @@ def mode_main():
     train = np.arange(len(X)) > len(X)/4
     test  = np.arange(len(X)) <= len(X)/4
 
-    X_train = X[train]
-    Y_train = Y[train]
-
-    x_mean = X_train.mean(axis=0)
-    X_c = X_train - x_mean
-    x_std = X_c.std(axis=0)
-    X_n = X_c / x_std
-
-    print x_mean, x_std
-
     pca = sk.PCA(n_components=10)
-    pc = pca.fit_transform(X_n)
-
-    churn = Y_train[:,0] > 0.5
-
+    pipeline = spl.Pipeline([ ('scaler',spp.Scaler()), ('pca',pca) ])
+    
+    pc = pipeline.fit_transform(X[train])
+    """
+    churn = Y[train,0] > 0.5
     for i in range(1,9):
         plt.plot(pc[:,0], pc[:,i], 'go')
         plt.plot(pc[churn,0], pc[churn,i], 'ro')
@@ -85,7 +79,6 @@ def mode_main():
         plt.cla()
 
     loadings = pca.components_
-
     plt.plot(loadings[0], loadings[1], 'go')
     for i,l in enumerate(loadings[0:2].T): 
         plt.annotate(x_head[i],l+(i%3)*0.02);
@@ -93,28 +86,39 @@ def mode_main():
     plt.savefig("churn_loadings.png")
     plt.cla()
     """
-    y_mean = Y_train.mean()
-    Y_c = Y_train-y_mean
-    y_std = Y_c.std()
-    Y_n = Y_c / y_std
-    """
+    y_scaler = spp.Scaler(with_std=False)
+    linre = slm.LinearRegression()
+    linre.fit(X=pc, y=y_scaler.fit_transform(Y[train,0]))
+    
+    Y_pred = y_scaler.inverse_transform( linre.predict( pipeline.transform(X[test]) ) )
+    
+    #for p in np.hstack(( np.round(Y_pred,decimals=2)[:,None], Y[test] )): print p
+    fpr, tpr, thresholds = sm.roc_curve(y_true=Y[test,0], y_score=Y_pred)
+    print sm.auc(fpr, tpr)
+    #print sm.classification_report(y_true=Y[test,0], y_pred=Y_pred)
+    plt.plot(fpr, tpr, 'g-')
+    plt.savefig("roc.png")
+mode_main()
 
-    y_mean = Y_train.mean()
-    Y_c = Y_train-y_mean
-    y_std = 1
-    Y_n = Y_c
-    """
-    y_mean = 0
-    y_std = 1
-    Y_n = Y_train
-    """
-
-    (a,residues,rank,s) = la.lstsq(pc,Y_n)
-
-    pc_test = pca.transform((X[test]-x_mean)/x_std)
-
-    Y_pred = pc_test.dot(a) * y_std + y_mean
-
-    for p in np.hstack(( np.round(Y_pred,decimals=2), Y[test] )): print p
-
+"""
+linre = slm.LinearRegression()
+linre.fit(
+    X=np.array([
+        [0,1,2],
+        [2,3,4],
+        [4,5,6]
+    ]),
+    y=np.array([
+        6,
+        7,
+        8
+    ]),
+)
+print linre.predict(
+    X=np.array([
+        [6,7,8],
+        [8,9,10],
+    ])
+)
+"""
 
