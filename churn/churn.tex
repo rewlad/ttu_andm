@@ -1,0 +1,119 @@
+
+\documentclass{article}
+
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks,linkcolor=,urlcolor=blue}
+
+\begin{document}
+
+\begin{verbatim}
+== Goals ==
+
+Create a model to predict churn and help churn reduction.
+Try different tools provided by scikit-learn package, including PCA and PLS.
+
+== Work flow ==
+
+Data was extracted from the spreadsheet and samples were shuffled.
+Data forms predictor and response matrices (X,Y) (test,train) with float values.
+Three unique area codes were converted to numeric variable.
+All these codes were from California, and state column was decided to be ignored.
+
+Churn prediction problem can be solved as binary classification.
+The classifier output can be a real value (continuous).
+For example, it can be probability of churn.
+In this case the boundary between classes is determined by a threshold value.
+Result of the prediction can contain errors of two types:
+1) false positive (churn predicted, actually no churn),
+2) false negative (no churn predicted, actually was churn).
+Taking different threshold values, we can reduce one, enlarging other.
+So this value is determined by these error comparative costs.
+Quality of classifier can be estimated 
+    by ROC curve (receiver operating characteristic) and AUC value.
+
+Linear regression model was successfully tried.
+PLS model behaved a slightly better than simple linear, but not notably.
+AUC > 0.8 (blue ROC curves).
+
+PCA was tried and score and loadings plots reviewed.
+PCA is a way to reduce dimensionality of data -- 
+    compose principal components from redundant variables (linear combination).
+Score plots show samples in the space of some pair of principal components.
+Loadings plots show how original variables affect pair of principal components.
+One of score plots showed two clusters of samples.
+The corresponding loadings plot showed connection with vmail* and night* stuff.
+However clusters were not stable and can disappear with another training subset.
+
+PCA mostly works better with scaled data and can be used in a PCR pipeline, like:
+    scaling --> PCA --> linear regression.
+Dimensionality reduces to about 13 components.
+But the real power of PCR and PLS can be seen 
+    when number of variables is more than number of samples.
+In our case this worked as good as simple linear regression.
+
+Logistic regression and support vector machines was briefly tried, 
+but not successfully due to bad tuning or overall incompatibility with the task.
+
+The best result was given by decision tree classifier (green ROC curve).
+Tree with maximal depth 5 seems to work good.
+Making it bigger had not much improved the model or even made it overfitted.
+Pipelining with PCA was not successful.
+
+Decision tree is well observable (white box).
+However it greatly changes appearance with training set reselection.
+Variables, that was mostly mentioned in the tree:
+    CustServ Calls, Day Mins, Int'l Plan, VMail Message, Eve Mins.
+Suggestions are that customers are likely to churn, having:
+-- int'l plan,
+-- talking much w/o vmail messages,
+-- calling support (m. b. angry with problems) and not talking much.
+These can happen due to customers personal unstable behaviour.
+These can happen due to corresponding competitor's proposal.
+
+== More things to try ==
+
+Clusters discovered by PCA can be then handled by separate models, 
+then accuracy may rise.
+
+Variables have different nature. 
+It may be good to observe their distribution and preprocess them separately,
+    for example, applying logarithmic scale.
+
+States and codes are not comparable as numbers.
+It may be better to map each of them to 
+    as many variables as there are different options, getting sparse matrix.
+For example, we'll have zeroes and ones in column California. 
+
+Model may work in pair.
+Samples may be handled by decision tree, 
+    but unclear ones forwarded to another model.
+
+Bayesian networks and neural networks can be tried.
+
+Decision tree options (like min_samples_leaf) can be tuned.
+
+\end{verbatim}
+
+\clearpage
+
+%\begin{figure}[h!]
+\centering
+\includegraphics[width=80mm]{out/roc.png}
+\includegraphics[width=80mm]{out/churn_scores_0_3.png}
+\includegraphics[width=80mm]{out/churn_loadings_0_3.png}
+\clearpage
+\includegraphics[width=195mm,angle=90,origin=c]{out/dtree2.png}
+
+%\caption{length of stay to profit}
+%\end{figure}
+
+\clearpage
+
+See python sources at \url{https://github.com/rewlad/ttu_andm}
+
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily,breaklines=true]{churn.py}
+
+\end{document}

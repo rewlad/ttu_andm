@@ -1,19 +1,4 @@
 
-#autoscaling, centering
-#0-s?
-#sq 
-# decision trees, Bayesian networks, support vector machines, and neural networks.
-# the effort to reduce one type of error generally results in increasing the other type of error
-#PPV NPV
-#the sensitivity of the test can be determined by testing only positive cases
-
-# StandardScaler OneHotEncoder
-# LogisticRegression
-
-#import sys
-#sys.path.insert(0,'/home/rewlad/tmp/lib/python')
-#print sys.path
-
 import glob
 import csv
 import numpy as np
@@ -56,7 +41,8 @@ def mode_check_rows():
     X, Y, x_head, train, test = rows_to_predictor_response(rows, head)
     print head, x_head, head[7]
     print X.shape, Y.shape
-    print len(Y[train]), len(Y[test]), np.count_nonzero(Y[train]), np.count_nonzero(Y[test])
+    print len(Y[train]), len(Y[test])
+    print np.count_nonzero(Y[train]), np.count_nonzero(Y[test])
     print np.count_nonzero(Y)/float(len(Y))
     print np.count_nonzero(Y[train])/float(len(Y[train]))
     print np.count_nonzero(Y[test])/float(len(Y[test]))
@@ -65,14 +51,15 @@ def plot_rocs(nm,color,y_true,y_pred):
     fpr, tpr, thresholds = metrics.roc_curve(y_true=y_true, y_score=y_pred)
     print metrics.auc(fpr, tpr)
     if len(fpr)<4: print fpr, tpr
-    path = "roc."+nm+".npz"
+    path = "out/roc."+nm+".npz"
     np.savez(path,fpr=fpr, tpr=tpr, thresholds=thresholds, color=np.array([color]))
+    plt.title('ROC curves')
     plt.xlabel('FPR')
     plt.ylabel('TPR')
-    for fn in glob.glob("roc.*.npz"): 
+    for fn in glob.glob("out/roc.*.npz"): 
         v = np.load(fn)
         plt.plot(v['fpr'], v['tpr'], v['color'][0])
-    plt.savefig("roc.png")
+    plt.savefig("out/roc.png")
     plt.cla()
     
     
@@ -86,18 +73,24 @@ def mode_pca():
     
     churn = Y[train,0] > 0.5
     for i in range(1,13):
+        plt.title('PCA scores')
+        plt.xlabel('pc[0]')
+        plt.ylabel('pc['+str(i)+']')
         plt.plot(pc[:,0], pc[:,i], 'go')
         plt.plot(pc[churn,0], pc[churn,i], 'ro')
-        plt.savefig("churn_scores_0_"+str(i)+".png")
+        plt.savefig("out/churn_scores_0_"+str(i)+".png")
         plt.cla()
 
     loadings = pca.components_
     for i in range(1,13):
+        plt.title('PCA loadings')
+        plt.xlabel('pc[0]')
+        plt.ylabel('pc['+str(i)+']')
         plt.plot(loadings[0], loadings[i], 'go')
         for j,l in enumerate(loadings[[0,i]].T): 
             plt.annotate(x_head[j],l); #-(j%3)*0.02
             #print x_head[i],l
-        plt.savefig("churn_loadings_0_"+str(i)+".png")
+        plt.savefig("out/churn_loadings_0_"+str(i)+".png")
         plt.cla()
     
     y_scaler = preprocessing.Scaler(with_std=False)
@@ -142,100 +135,7 @@ def mode_tree():
     tree.export_graphviz(clf, out_file='dtree.graphviz',feature_names=x_head)
     #convert using: dot dtree.graphviz -Tpng > dtree2.png
 
-def mode_pca_tree():
-    rows, head = load_rows()
-    X, Y, x_head, train, test = rows_to_predictor_response(rows, head)
-    
-    pca = decomposition.PCA(n_components=13)
-    re_pipeline = pipeline.Pipeline([ ('scaler',preprocessing.Scaler()), ('pca',pca) ])
-    pc = re_pipeline.fit_transform(X[train])
-    
-    clf = tree.DecisionTreeClassifier(max_depth=5)
-    clf.fit(X=pc, y=Y[train,0])
-    y_pred = clf.predict( re_pipeline.transform(X[test]) )
-    
-    plot_rocs('pca_tree','r-',Y[test,0],y_pred)
-    
-    tree.export_graphviz(clf, out_file='pca_dtree.graphviz',feature_names=x_head)
-    
-
 mode_linre()
 mode_pca()
 mode_pls()
 mode_tree()
-#mode_pca_tree()
-"""
-clf = tree.DecisionTreeClassifier()
-clf.fit(
-    X=np.array([
-        [0,1,2],
-        [2,3,4],
-        [4,5,6]
-    ]),
-    y=np.array([
-        6,
-        7,
-        8
-    ]),
-)
-tree.export_graphviz(clf, out_file='test.graphviz')
-"""
-"""
-linre = linear_model.LinearRegression()
-linre.fit(
-    X=np.array([
-        [0,1,2],
-        [2,3,4],
-        [4,5,6]
-    ]),
-    y=np.array([
-        6,
-        7,
-        8
-    ]),
-)
-print linre.predict(
-    X=np.array([
-        [6,7,8],
-        [8,9,10],
-    ])
-)
-"""
-#y_repred = clf.predict(X[train]);
-#print metrics.roc_curve(y_true=Y[train,0], y_score=y_repred) #fpr, tpr
-    
-#print metrics.classification_report(y_true=Y[test,0], y_pred=Y_pred)
-#for p in np.hstack(( np.round(Y_pred,decimals=2)[:,None], Y[test] )): print p
-
-################################################################################
-
-
-#LogisticRegression gives random 0.5 :-(
-#linre = linear_model.LogisticRegression(C=100000.0, dual=False, fit_intercept=True, intercept_scaling=1, penalty='l2', tol=0.0001)
-
-#0.5
-#re = svm.SVC()    re.fit(X[train], Y[train,0])    y_pred = re.predict( X[test] )
-
-#with 13 pc-s same 0.83- as without it, less worse
-#pca = decomposition.PCA(n_components=13)
-
-#pls -- same 0.83+
-
-#DecisionTreeClassifier 0.86/0.82 -- a bit better
-#0.03; 0.7
-
-#found clusters at pc3: vmail+night
-
-#pca then tree: same or worse
-
-
-#try clusters at pc3
-#try? find deps from orig vars
-#try preproc nonlinear
-#try multi vars for codes
-#try tree, if fails then other
-
-#try by wiki: Bayesian networks and neural networks.
-
-
-
