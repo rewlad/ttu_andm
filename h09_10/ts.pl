@@ -9,5 +9,5 @@ for(<>){
     $txt=~s/\W/_/g;
     print $cur_c eq $prev_c ? " ": "\n";
     $prev_c = $cur_c;
-    print $txt;
+    print lc $txt;
 }
