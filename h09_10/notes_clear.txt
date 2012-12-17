@@ -1,0 +1,38 @@
+
+== Work Flow ==
+
+Perl script was created.
+Fixes: non-letters to underscore, letters to lower case.
+$ 
+
+Apriori was briefly overviewed, and useful options was found:
+-t#      target type (default: s)
+-tr      target type r: association rules
+-s#      minimum support    of a     set/rule     (default: 10%)
+-c#      minimum confidence of a     rule         (default: 80%)
+
+For example:
+D <- A B (50, 100)
+means that:
+    (A and B) is in 50% of rows, (>-s)
+    D is in all rows where is (A and B), (>-c)
+
+Top sets and rules was found.
+Default filter parameters needed to be lowered to find rules.
+
+
+perl ts.pl < tshekid_office2003.csv > input2.txt
+./apriori -ts input2.txt output-s.txt
+./apriori -tr -s3 input2.txt output-r-s3.txt
+./apriori -tr -c60 input2.txt output-r-c60.txt
+
+
+
+
+
+
+
+
+
+#output0s -- about to be all "&&" groups
+#output0 -- 28 lines -- all groups >= 10%
