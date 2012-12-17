@@ -1,6 +1,9 @@
 
 \documentclass{article}
 
+\usepackage{verbatim}
+\usepackage[utf8]{inputenc}
+
 \usepackage{listings}
 \usepackage{hyperref}
 
@@ -8,19 +11,18 @@
 
 \begin{document}
 
-%\begin{verbatim}
-%\end{verbatim}
-
-%\clearpage
-
-Executor: Sergei Kirjanov, Open Univ. \\
+Executor: Sergei Kirjanov, 128217FAY \\
+\\
 See sources at \url{https://github.com/rewlad/ttu_andm} \\
 
 \lstinputlisting[basicstyle=\footnotesize\ttfamily]{notes_clear.txt}
 \lstinputlisting[language=Bash,numbers=left,basicstyle=\footnotesize\ttfamily,breaklines=true]{ts.sh}
 \lstinputlisting[language=Perl,numbers=left,basicstyle=\footnotesize\ttfamily,breaklines=true]{ts.pl}
-\lstinputlisting[basicstyle=\footnotesize\ttfamily]{output-s.txt}
-\lstinputlisting[basicstyle=\footnotesize\ttfamily]{output-r-s3.txt}
-\lstinputlisting[basicstyle=\footnotesize\ttfamily]{output-r-c60.txt}
+\clearpage
+\verbatiminput{output-s.txt}
+\clearpage
+\verbatiminput{output-r-s3.txt}
+%\clearpage
+\verbatiminput{output-r-c60.txt}
 
 \end{document}
